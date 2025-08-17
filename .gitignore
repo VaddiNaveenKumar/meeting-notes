@@ -1,0 +1,15 @@
+# macOS/Windows
+.DS_Store
+Thumbs.db
+
+# Node/Vite
+meeting-notes-ui/node_modules
+meeting-notes-ui/dist
+
+# Java/Maven
+meetingnotesapp/target
+meetingnotesapp/.mvn/wrapper/maven-wrapper.jar
+
+# Logs
+*.log
+meetingnotesapp/logs/
