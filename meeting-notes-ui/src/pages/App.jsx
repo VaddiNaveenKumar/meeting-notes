@@ -287,7 +287,8 @@ export default function App() {
       const payload = { transcriptText, prompt }
       if (title.trim()) payload.title = title.trim()
 
-      const res = await fetch('http://localhost:8080/api/summary/stream', {
+      const baseUrl = import.meta.env.VITE_API_BASE || 'http://localhost:8080'
+      const res = await fetch(`${baseUrl}/api/summary/stream`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

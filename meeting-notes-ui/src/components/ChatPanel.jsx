@@ -33,7 +33,8 @@ export default function ChatPanel({ transcript, summary, onClose }) {
     setMessages(prev => [...prev, { role: 'ai', content: '', isStreaming: true }])
 
     try {
-      const response = await fetch('http://localhost:8080/api/chat/stream', {
+      const baseUrl = import.meta.env.VITE_API_BASE || 'http://localhost:8080'
+      const response = await fetch(`${baseUrl}/api/chat/stream`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
