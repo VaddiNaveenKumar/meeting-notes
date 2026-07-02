@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,11 +18,16 @@ import java.util.UUID;
 public class AuthController {
 
     private final AppUserRepository userRepository;
+    private final dev.vaddinaveenkumar.meetingnotes.repo.TranscriptRepository transcriptRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthController(AppUserRepository userRepository, JwtService jwtService, PasswordEncoder passwordEncoder) {
+    public AuthController(AppUserRepository userRepository, 
+                          dev.vaddinaveenkumar.meetingnotes.repo.TranscriptRepository transcriptRepository,
+                          JwtService jwtService, 
+                          PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.transcriptRepository = transcriptRepository;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
     }
@@ -81,7 +87,9 @@ public class AuthController {
     }
     
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> login(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @RequestBody Map<String, String> request) {
         String email = request.get("email");
         String password = request.get("password");
         
@@ -89,6 +97,24 @@ public class AuthController {
         if (userOpt.isPresent()) {
             AppUser user = userOpt.get();
             if (passwordEncoder.matches(password, user.getPasswordHash())) { // BCrypt comparison
+                
+                // Migrate guest data if applicable
+                if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                    String jwt = authHeader.substring(7);
+                    if (jwtService.isTokenValid(jwt)) {
+                        String guestId = jwtService.extractUsername(jwt);
+                        Optional<AppUser> guestOpt = userRepository.findById(UUID.fromString(guestId));
+                        if (guestOpt.isPresent() && guestOpt.get().isAnonymous()) {
+                            // Transfer all guest transcripts to the real user
+                            List<dev.vaddinaveenkumar.meetingnotes.model.Transcript> guestTranscripts = transcriptRepository.findByOwnerUserId(guestId);
+                            guestTranscripts.forEach(t -> t.setOwnerUserId(user.getId().toString()));
+                            transcriptRepository.saveAll(guestTranscripts);
+                            // Delete the temporary guest account
+                            userRepository.delete(guestOpt.get());
+                        }
+                    }
+                }
+
                 String token = jwtService.generateToken(user.getId().toString());
                 return ResponseEntity.ok(Map.of("token", token, "userId", user.getId()));
             }
