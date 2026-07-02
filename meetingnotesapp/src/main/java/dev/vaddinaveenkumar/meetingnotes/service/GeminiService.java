@@ -32,14 +32,30 @@ public class GeminiService {
     }
 
     public String generateSummary(String transcript, String userInstruction) {
-        if (apiKeys.isEmpty()) throw new RuntimeException("No Gemini API keys configured.");
         String promptText = "Instruction:\n" + userInstruction + "\n\nTranscript:\n" + transcript;
+        return generateContent(promptText, getSystemPromptTemplate(), 0.25);
+    }
+
+    public String generateTitle(String transcript) {
+        String sysPrompt = "Generate a short, professional 3 to 6 word title for the meeting. Output ONLY the title, no quotes, no markdown.";
+        String text = "Transcript:\n" + transcript;
+        try {
+            String title = generateContent(text, sysPrompt, 0.1);
+            return title.trim().replaceAll("^\"|\"$", "");
+        } catch (Exception e) {
+            log.warn("Failed to generate AI title, throwing to fallback", e);
+            throw new RuntimeException("Title generation failed", e);
+        }
+    }
+
+    private String generateContent(String promptText, String systemPrompt, double temperature) {
+        if (apiKeys.isEmpty()) throw new RuntimeException("No Gemini API keys configured.");
         Exception lastEx = null;
 
         for (int keyIdx = 0; keyIdx < apiKeys.size(); keyIdx++) {
             String key = apiKeys.get(keyIdx);
             String url = String.format("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", defaultModel, key);
-            Map<String, Object> body = buildBody(promptText, getSystemPromptTemplate(), 0.25);
+            Map<String, Object> body = buildBody(promptText, systemPrompt, temperature);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);

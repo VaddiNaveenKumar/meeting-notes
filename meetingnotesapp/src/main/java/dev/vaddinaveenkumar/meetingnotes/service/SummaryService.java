@@ -45,9 +45,14 @@ public class SummaryService {
     }
 
     private String deriveTitle(String text) {
-        String trimmed = text == null ? "" : text.trim().replaceAll("\\s+", " ");
-        if (trimmed.isEmpty()) return "Untitled";
-        return trimmed.length() > 60 ? trimmed.substring(0, 60) + "..." : trimmed;
+        try {
+            return geminiService.generateTitle(text);
+        } catch (Exception e) {
+            log.warn("Failed to generate title with AI, falling back to basic extraction", e);
+            String trimmed = text == null ? "" : text.trim().replaceAll("\\s+", " ");
+            if (trimmed.isEmpty()) return "Untitled";
+            return trimmed.length() > 60 ? trimmed.substring(0, 60) + "..." : trimmed;
+        }
     }
 
     public Flux<String> streamGenerateAndSave(String transcriptText, String prompt, String title, String ownerUserId, AtomicReference<UUID> outTranscriptId, AtomicReference<UUID> outSummaryId) {

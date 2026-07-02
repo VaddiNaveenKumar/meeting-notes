@@ -220,7 +220,7 @@ export default function App() {
 
     const name = file.name.toLowerCase()
     
-    if (!title.trim()) setTitle(file.name.replace(/\.[^/.]+$/, '').slice(0, 60))
+    // We leave the title blank by default so the AI can auto-generate a smart title
 
     if (name.endsWith('.txt')) {
       const text = await file.text()
