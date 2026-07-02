@@ -1,7 +1,7 @@
 # 🧠 AI Meeting Summarizer & Chat Assistant
 
 ![Project Status](https://img.shields.io/badge/Status-Active-success)
-![Spring Boot](https://img.shields.io/badge/Backend-Spring%20Boot%203-6DB33F?logo=springboot)
+![Spring Boot](https://img.shields.io/badge/Backend-Spring%20Boot%203.5-6DB33F?logo=springboot)
 ![React](https://img.shields.io/badge/Frontend-React%2018-61DAFB?logo=react)
 ![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791?logo=postgresql)
 ![Gemini AI](https://img.shields.io/badge/AI-Google%20Gemini-4285F4?logo=google)
