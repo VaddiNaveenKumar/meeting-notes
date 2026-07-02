@@ -322,6 +322,7 @@ export default function App() {
                   const meta = JSON.parse(dataStr)
                   if (meta.summaryId) setSummaryId(meta.summaryId)
                   if (meta.transcriptId) setTranscriptId(meta.transcriptId)
+                  if (meta.title) setTitle(meta.title)
                 } catch (_) {}
               } else if (dataStr.startsWith('Error:')) {
                 show(dataStr, 'error'); return
@@ -379,9 +380,10 @@ export default function App() {
         <div style="font-size: 14px; line-height: 1.6;">${summary}</div>
       </div>
     `
+    const safeTitleName = title ? title.replace(/[^a-z0-9]/gi, '_').toLowerCase() : 'meeting_summary'
     const opt = {
       margin:       10,
-      filename:     `${title || 'meeting_summary'}.pdf`,
+      filename:     `${safeTitleName}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2 },
       jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }

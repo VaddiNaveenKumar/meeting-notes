@@ -55,8 +55,10 @@ public class SummaryService {
         }
     }
 
-    public Flux<String> streamGenerateAndSave(String transcriptText, String prompt, String title, String ownerUserId, AtomicReference<UUID> outTranscriptId, AtomicReference<UUID> outSummaryId) {
+    public Flux<String> streamGenerateAndSave(String transcriptText, String prompt, String title, String ownerUserId, AtomicReference<UUID> outTranscriptId, AtomicReference<UUID> outSummaryId, AtomicReference<String> outTitle) {
         String finalTitle = (title != null && !title.isBlank()) ? title.trim() : deriveTitle(transcriptText);
+        if (outTitle != null) outTitle.set(finalTitle);
+        
         Transcript t = new Transcript(transcriptText, prompt, finalTitle, ownerUserId);
         Transcript savedTranscript = transcriptRepository.save(t);
         outTranscriptId.set(savedTranscript.getId());

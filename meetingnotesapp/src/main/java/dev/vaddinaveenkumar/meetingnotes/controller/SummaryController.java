@@ -76,6 +76,7 @@ public class SummaryController {
 
         AtomicReference<UUID> transcriptIdRef = new AtomicReference<>();
         AtomicReference<UUID> summaryIdRef = new AtomicReference<>();
+        AtomicReference<String> titleRef = new AtomicReference<>();
 
         Flux<String> summaryStream = summaryService.streamGenerateAndSave(
                 req.transcriptText(),
@@ -83,10 +84,14 @@ public class SummaryController {
                 req.title(),
                 owner,
                 transcriptIdRef,
-                summaryIdRef);
+                summaryIdRef,
+                titleRef);
 
-        String idMeta = String.format("{\"___META___\":true,\"transcriptId\":\"%s\",\"summaryId\":\"%s\"}",
-                transcriptIdRef.get(), summaryIdRef.get());
+        // Escape JSON title
+        String safeTitle = titleRef.get() != null ? titleRef.get().replace("\"", "\\\"") : "Untitled";
+
+        String idMeta = String.format("{\"___META___\":true,\"transcriptId\":\"%s\",\"summaryId\":\"%s\",\"title\":\"%s\"}",
+                transcriptIdRef.get(), summaryIdRef.get(), safeTitle);
 
         try {
             emitter.send(idMeta);
