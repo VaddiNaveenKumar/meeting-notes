@@ -109,4 +109,4 @@ npm run dev
 
 ---
 
-*Designed and developed by [Your Name]*
+*Designed and developed by Naveen Kumar*
